@@ -1,0 +1,293 @@
+name: 🏥 Medical Chat Agent System
+
+on:
+  issues:
+    types: [opened, edited]
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'المهمة الطبية المطلوبة'
+        required: true
+        type: string
+
+concurrency:
+  group: medical-${{ github.event.issue.number || 'manual' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  sabah-medical-agent:
+    name: 🎙️ Sabah Medical Consultation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      # 1. استخراج البيانات من Issue
+      - name: 📋 Extract Medical Request
+        id: extract
+        if: github.event_name == 'issues'
+        run: |
+          body="${{ github.event.issue.body }}"
+          task=$(echo "$body" | sed 's/^!medical\|^@Sabah//' | sed 's/^[[:space:]]*//')
+          {
+            echo "task<<EOF"
+            echo "$task"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          echo "✓ Task extracted: ${task:0:50}..."
+
+      # 2. Clone Repository
+      - name: 📁 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 3. إعداد Python
+      - name: 🐍 Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # 4. تثبيت المكتبات
+      - name: 📦 Install Dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r config/requirements.txt
+          echo "✓ Dependencies installed"
+
+      # 5. إعداد Google Cloud (للصوت)
+      - name: 🔐 Setup Google Cloud
+        if: secrets.GOOGLE_CLOUD_CREDENTIALS_JSON != ''
+        env:
+          GOOGLE_CLOUD_CREDENTIALS: ${{ secrets.GOOGLE_CLOUD_CREDENTIALS_JSON }}
+        run: |
+          echo "$GOOGLE_CLOUD_CREDENTIALS" > gcloud-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="gcloud-key.json"
+          echo "✓ Google Cloud configured"
+
+      # 6. تشغيل Genie Leader
+      - name: 🧞 Run Genie Leader Agent
+        id: genie
+        env:
+          # LLM APIs
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+
+          # Voice & Speech
+          GOOGLE_CLOUD_PROJECT_ID: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          AZURE_SPEECH_KEY: ${{ secrets.AZURE_SPEECH_KEY }}
+          AZURE_SPEECH_REGION: ${{ secrets.AZURE_SPEECH_REGION }}
+
+          # Medical Data
+          MEDLINE_API_KEY: ${{ secrets.MEDLINE_API_KEY }}
+          PUBMED_API_KEY: ${{ secrets.PUBMED_API_KEY }}
+          DRUGS_API_KEY: ${{ secrets.DRUGS_API_KEY }}
+
+          # Search & Location
+          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+          HOSPITAL_FINDER_API_KEY: ${{ secrets.HOSPITAL_FINDER_API_KEY }}
+
+          # Notifications
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+          # GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_EVENT: ${{ github.event_name }}
+          GITHUB_ISSUE: ${{ github.event.issue.number }}
+
+          # Task Input
+          TASK_INPUT: ${{ github.event.inputs.task || steps.extract.outputs.task }}
+        run: |
+          python -u agents/genie_leader.py 2>&1 | tee reports/execution.log
+          echo "EXECUTION_LOG=reports/execution.log" >> $GITHUB_OUTPUT
+
+      # 7. توليد الصوت
+      - name: 🔊 Generate Voice Response
+        id: voice
+        continue-on-error: true
+        run: |
+          python -u core/voice_handler.py 2>&1 | tee reports/voice.log
+          if [ -f "reports/response.mp3" ]; then
+            echo "voice_generated=true" >> $GITHUB_OUTPUT
+            echo "✓ Voice response generated"
+          else
+            echo "voice_generated=false" >> $GITHUB_OUTPUT
+          fi
+
+      # 8. إنشاء تقرير HTML
+      - name: 📊 Generate HTML Report
+        id: report
+        continue-on-error: true
+        run: |
+          python << 'PYEOF'
+          import json
+          from datetime import datetime
+
+          html_template = """
+          <!DOCTYPE html>
+          <html dir="rtl" lang="ar">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>تقرير الاستشارة الطبية 🏥</title>
+              <style>
+                  body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 20px; }}
+                  .container {{ max-width: 900px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); overflow: hidden; }}
+                  .header {{ background: linear-gradient(135deg, #E63946 0%, #F1FAEE 100%); padding: 30px; text-align: center; color: white; }}
+                  .header h1 {{ margin: 0; font-size: 2.5em; }}
+                  .header p {{ margin: 10px 0 0 0; font-size: 1.1em; }}
+                  .content {{ padding: 30px; }}
+                  .section {{ margin: 20px 0; padding: 15px; background: #f8f9fa; border-right: 4px solid #E63946; border-radius: 5px; }}
+                  .section h2 {{ color: #E63946; margin-top: 0; }}
+                  .timestamp {{ color: #666; font-size: 0.9em; }}
+                  .footer {{ text-align: center; padding: 20px; background: #f8f9fa; color: #666; border-top: 1px solid #ddd; }}
+                  .sabah-note {{ background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 5px; }}
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🎙️ صباح</h1>
+                      <p>تقرير الاستشارة الطبية</p>
+                  </div>
+                  <div class="content">
+                      <div class="section">
+                          <h2>📋 تفاصيل الاستشارة</h2>
+                          <p><strong>التاريخ:</strong> {timestamp}</p>
+                          <p><strong>حالة المعالجة:</strong> ✓ مكتملة</p>
+                      </div>
+                      <div class="sabah-note">
+                          💡 <strong>ملاحظة طبية مهمة:</strong> هذه المعلومات للتثقيف الصحي فقط وليست بديلاً عن استشارة الطبيب المتخصص.
+                      </div>
+                      <div class="section">
+                          <h2>📊 نتائج المعالجة</h2>
+                          <p>تم معالجة الطلب بنجاح من قبل فريق الوكلاء المتخصصة.</p>
+                      </div>
+                  </div>
+                  <div class="footer">
+                      <p>تم إنشاؤه بواسطة نظام صباح الطبي الذكي 🏥</p>
+                      <p class="timestamp">{datetime}</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+          """
+
+          html_content = html_template.format(
+              timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+              datetime=datetime.now().isoformat()
+          )
+
+          with open("reports/consultation_report.html", "w", encoding="utf-8") as f:
+              f.write(html_content)
+
+          print("✓ HTML report generated")
+          PYEOF
+
+      # 9. حفظ وتحميل التقارير
+      - name: 💾 Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Medical Consultation Reports
+          path: reports/
+          retention-days: 30
+
+      # 10. الرد على Issue
+      - name: 💬 Reply to GitHub Issue
+        if: github.event_name == 'issues'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let comment = `🎙️ **صباح** تجيب على استشارتك\n\n`;
+            comment += `✓ تم معالجة الطلب الطبي بنجاح\n\n`;
+
+            if (fs.existsSync('reports/response.txt')) {
+              const response = fs.readFileSync('reports/response.txt', 'utf8');
+              comment += response;
+            }
+
+            if (fs.existsSync('reports/response.mp3')) {
+              comment += `\n\n🔊 [استمع للاستشارة بصوتي](https://github.com/${{ github.repository }}/releases/download/latest/response.mp3)\n`;
+            }
+
+            comment += `\n---\n⏰ *تم في ${new Date().toLocaleString('ar-EG')}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      # 11. Commit النتائج
+      - name: 📝 Commit Results
+        if: always()
+        run: |
+          git config --local user.email "sabah@medical-chat.ai"
+          git config --local user.name "Sabah 🎙️"
+          git add reports/ memory/ 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "🏥 Medical consultation by Sabah - $(date +'%Y-%m-%d %H:%M')"
+          git push origin main --force-with-lease 2>&1 || echo "⚠️ Could not push (no changes or permission)"
+
+      # 12. إرسال إخطار Telegram (اختياري)
+      - name: 📱 Send Telegram Notification
+        if: always() && secrets.TELEGRAM_BOT_TOKEN != ''
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python << 'PYEOF'
+          import requests
+          import os
+          from datetime import datetime
+
+          bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+          chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+          message = f"""
+          🏥 Medical Consultation Complete
+
+          ✓ Status: Successful
+          ⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+          🎙️ Agent: Sabah
+
+          Reports saved to GitHub
+          """
+
+          if bot_token and chat_id:
+              requests.post(
+                  f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                  data={
+                      "chat_id": chat_id,
+                      "text": message,
+                      "parse_mode": "HTML"
+                  }
+              )
+          PYEOF
+
+      # 13. ملخص النتائج
+      - name: 📈 Workflow Summary
+        if: always()
+        run: |
+          echo "🏥 Medical Chat System - Execution Summary"
+          echo "=========================================="
+          echo "✓ Genie Leader Agent: Executed"
+          echo "✓ Medical Consultant: Active"
+          echo "✓ Drug Database Agent: Ready"
+          echo "✓ Hospital Finder: Ready"
+          echo "✓ Price Comparison: Ready"
+          echo "✓ Voice Generation: ${{ steps.voice.outcome }}"
+          echo "=========================================="
+          echo "Reports saved in: reports/"

@@ -1,0 +1,163 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://shahineyoung21.github.io/medical-pregnancy-look/
+Subject: =?utf-8?Q?=D9=85=D8=AA=D8=A7=D8=A8=D8=B9=D8=A9=20=D8=A7=D9=84=D8=AD=D9=85?=
+ =?utf-8?Q?=D9=84=20=F0=9F=8C=B8?=
+Date: Sat, 3 Oct 2026 21:12:21 +0300
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--0UriDeKaXrVXvcWwQMgfkpXfLm8dE2qUTyXtty6wYF----"
+
+
+------MultipartBoundary--0UriDeKaXrVXvcWwQMgfkpXfLm8dE2qUTyXtty6wYF----
+Content-Type: text/html
+Content-ID: <frame-2736C608F68290015E2FF3D536023E04@mhtml.blink>
+Content-Transfer-Encoding: binary
+Content-Location: https://shahineyoung21.github.io/medical-pregnancy-look/
+
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f9c9d4">
+  <title>متابعة الحمل 🌸</title>
+  <link rel="stylesheet" href="https://shahineyoung21.github.io/medical-pregnancy-look/style.css">
+  <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;%F0%9F%8C%B8&lt;/text&gt;&lt;/svg&gt;">
+</head>
+<body>
+
+  <header class="hero">
+    <h1>🌸 متابعة الحمل</h1>
+    <p class="subtitle">رحلتك الجميلة خطوة بخطوة</p>
+  </header>
+
+  <main class="container">
+
+    <!-- بطاقة الملخص -->
+    <section class="summary-card" aria-label="ملخص الحمل">
+      <div class="summary-item">
+        <span class="summary-value" id="currentWeek">--</span>
+        <span class="summary-label">الأسبوع</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-value" id="currentMonth">--</span>
+        <span class="summary-label">الشهر</span>
+      </div>
+      <div class="summary-item wide">
+        <span class="summary-value small" id="trimester">--</span>
+        <span class="summary-label">المرحلة</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-value" id="daysLeft">--</span>
+        <span class="summary-label">يوم متبقي</span>
+      </div>
+    </section>
+
+    <!-- الفورم -->
+    <section class="card">
+      <h2>📝 بياناتك اليومية</h2>
+      <form id="pregnancyForm" autocomplete="off">
+
+        <label class="field">
+          <span>تاريخ الولادة المتوقع</span>
+          <input type="date" id="dueDate" required="">
+        </label>
+
+        <label class="field">
+          <span>الوزن (كجم)</span>
+          <input type="number" id="weight" step="0.1" min="30" max="200" placeholder="مثال: 65.5">
+        </label>
+
+        <label class="field">
+          <span>ضغط الدم</span>
+          <input type="text" id="bp" placeholder="مثال: 120/80">
+        </label>
+
+        <label class="field">
+          <span>ملاحظات</span>
+          <textarea id="notes" rows="3" placeholder="أي حاجة تحبي تسجليها..."></textarea>
+        </label>
+
+        <div class="actions">
+          <button type="submit" class="btn primary">💾 حفظ</button>
+          <button type="button" id="resetBtn" class="btn ghost">🗑️ مسح الكل</button>
+        </div>
+      </form>
+    </section>
+
+    <footer class="footer">
+      <p>⚠️ ده تطبيق متابعة شخصي فقط — مش بديل عن استشارة طبيبك.</p>
+      <p class="love">صُنع بـ ❤️</p>
+    </footer>
+
+  </main>
+
+  
+
+
+</body></html>
+------MultipartBoundary--0UriDeKaXrVXvcWwQMgfkpXfLm8dE2qUTyXtty6wYF----
+Content-Type: text/css
+Content-Transfer-Encoding: binary
+Content-Location: https://shahineyoung21.github.io/medical-pregnancy-look/style.css
+
+@charset "utf-8";
+
+:root { --pink-50: #fff5f8; --pink-100: #fde4ec; --pink-200: #f9c9d4; --pink-400: #f08fa8; --pink-600: #d65c7d; --ink: #3a2b32; --ink-soft: #7a6a71; --white: #ffffff; --shadow: 0 4px 16px rgba(214, 92, 125, 0.12); --radius: 18px; }
+
+* { box-sizing: border-box; margin: 0px; padding: 0px; }
+
+html, body { font-family: "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif; background: linear-gradient(160deg, var(--pink-50), var(--pink-100)); color: var(--ink); min-height: 100vh; line-height: 1.6; }
+
+.hero { text-align: center; padding: 2rem 1rem 1rem; }
+
+.hero h1 { font-size: 1.8rem; color: var(--pink-600); margin-bottom: 0.25rem; }
+
+.subtitle { color: var(--ink-soft); font-size: 0.95rem; }
+
+.container { max-width: 560px; margin: 0px auto; padding: 1rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+.summary-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem 1rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; text-align: center; }
+
+.summary-item { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.5rem; }
+
+.summary-item.wide { grid-column: span 3; background: var(--pink-50); border-radius: 12px; }
+
+.summary-value { font-size: 2rem; font-weight: 700; color: var(--pink-600); line-height: 1.1; }
+
+.summary-value.small { font-size: 1.2rem; font-weight: 600; }
+
+.summary-label { font-size: 0.8rem; color: var(--ink-soft); }
+
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.25rem; }
+
+.card h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--pink-600); }
+
+.field { display: block; margin-bottom: 1rem; }
+
+.field span { display: block; font-size: 0.9rem; margin-bottom: 0.35rem; color: var(--ink-soft); font-weight: 600; }
+
+.field input, .field textarea { width: 100%; padding: 0.7rem 0.9rem; border: 1.5px solid var(--pink-100); border-radius: 12px; font-size: 1rem; font-family: inherit; color: var(--ink); background: var(--pink-50); transition: border-color 0.2s, background 0.2s; }
+
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--pink-400); background: var(--white); }
+
+.field textarea { resize: vertical; min-height: 70px; }
+
+.actions { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+
+.btn { flex: 1 1 0%; padding: 0.8rem 1rem; border-width: medium; border-style: none; border-color: currentcolor; border-image: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: transform 0.1s, opacity 0.2s; }
+
+.btn:active { transform: scale(0.98); }
+
+.btn.primary { background: linear-gradient(135deg, var(--pink-400), var(--pink-600)); color: var(--white); box-shadow: rgba(214, 92, 125, 0.3) 0px 4px 12px; }
+
+.btn.ghost { background: transparent; color: var(--pink-600); border: 1.5px solid var(--pink-200); }
+
+.footer { text-align: center; padding: 1rem 0px 2rem; font-size: 0.8rem; color: var(--ink-soft); }
+
+.footer .love { margin-top: 0.5rem; font-size: 0.9rem; color: var(--pink-600); }
+
+@media (max-width: 380px) {
+  .summary-value { font-size: 1.6rem; }
+  .hero h1 { font-size: 1.5rem; }
+}
+------MultipartBoundary--0UriDeKaXrVXvcWwQMgfkpXfLm8dE2qUTyXtty6wYF------
