@@ -19,6 +19,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
+      - name: Test FastAPI backend
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --disable-pip-version-check -r backend/requirements-dev.txt
+          python -m pytest backend/tests -q
+
       - name: Set up Java
         uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
@@ -47,7 +54,9 @@ jobs:
         run: flutter test --no-pub
 
       - name: Build installable debug APK
-        run: flutter build apk --debug --no-pub
+        env:
+          SABAH_API_BASE_URL: ${{ vars.SABAH_API_BASE_URL }}
+        run: flutter build apk --debug --no-pub --dart-define="SABAH_API_BASE_URL=$SABAH_API_BASE_URL"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
