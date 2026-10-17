@@ -25,3 +25,10 @@ def test_emergency_phrase_is_flagged():
     result = classify_message("عندي صعوبة في التنفس")
     assert result.concern_detected is True
     assert result.emergency is True
+
+
+def test_personal_condition_statement_triggers_clinician_escalation():
+    for message in ("عندي ربو", "لدي السكري", "I have asthma"):
+        result = classify_message(message)
+        assert result.concern_detected is True
+        assert result.emergency is False

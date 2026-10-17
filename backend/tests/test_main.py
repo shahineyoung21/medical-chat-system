@@ -112,3 +112,17 @@ def test_rejects_oversized_or_extra_input_fields():
         "/api/chat",
         {"message": "الربو", "history": ["خاص"]},
     ).status_code == 422
+
+
+def test_personal_disease_statement_never_reaches_source_or_model():
+    source_client = FakeSourceClient()
+    generator = FakeAnswerGenerator()
+    app = create_app(source_client, generator)
+
+    response = _post(app, "/api/chat", {"message": "عندي ربو"})
+
+    assert response.status_code == 200
+    assert response.json()["concern_detected"] is True
+    assert "طبيب" in response.json()["answer"]
+    assert source_client.calls == []
+    assert generator.calls == []

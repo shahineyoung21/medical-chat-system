@@ -41,7 +41,7 @@ class OpenAISettings:
 
 
 _UNSAFE_OUTPUT = re.compile(
-    r"(?i)(جرع|تناول|خذ\s+دواء|خذ\s+حبه|استخدم\s+دواء|ابدأ\s+العلاج|علاجك|علاج\s+هو|ينصح\s+بتناول|توقف\s+عن\s+الدواء|dose|dosage|take\s+.*(?:medicine|medication)|you\s+have\s+.*(?:disease|condition))"
+    r"(?i)(جرع|تناول|خذ\s+دواء|خذ\s+حبه|استخدم\s+دواء|ابدأ\s+العلاج|علاجك|علاج\s+هو|ينصح\s+بتناول|توقف\s+عن\s+الدواء|تشخيصك|(?:أنت|انت)\s+(?:مصاب|مصابة|مريض|مريضة)|قد\s+تكون\s+(?:مصاب|مصابة|مريض|مريضة)|dose|dosage|take\s+.*(?:medicine|medication)|you\s+(?:have|may\s+have|likely\s+have|have\s+been\s+diagnosed\s+with))"
 )
 
 

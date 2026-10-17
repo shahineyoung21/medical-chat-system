@@ -98,4 +98,24 @@ void main() {
 
     expect(find.textContaining('لا يثبت خلوّك'), findsOneWidget);
   });
+
+  testWidgets('personal disease statement is intercepted before networking',
+      (tester) async {
+    final service = FakeChatService(
+      const ChatReply(answer: 'لا ينبغي الوصول إليه'),
+    );
+    await tester.pumpWidget(SabahDemoApp(chatService: service));
+
+    await tester.enterText(
+      find.byKey(const Key('message-field')),
+      'عندي ربو',
+    );
+    await tester.tap(find.byKey(const Key('send-message')));
+    await tester.pumpAndSettle();
+
+    expect(service.sentMessages, isEmpty);
+    await tester.tap(find.byKey(const Key('finish-session')));
+    await tester.pumpAndSettle();
+    expect(find.text('تذكير صحي مهم'), findsOneWidget);
+  });
 }

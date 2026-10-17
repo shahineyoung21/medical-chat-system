@@ -84,3 +84,37 @@ def test_provider_rejects_treatment_or_dose_in_model_output():
             await client.aclose()
 
     asyncio.run(run_test())
+
+
+def test_provider_rejects_personal_diagnostic_claim():
+    async def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"output_text": "أنت مصاب بالربو بالتأكيد."},
+        )
+
+    async def run_test():
+        client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+        generator = OpenAIAnswerGenerator(
+            OpenAISettings(api_key="test-key-not-real", model="test-model"),
+            client=client,
+        )
+        try:
+            try:
+                await generator.generate(
+                    TOPICS[0],
+                    [
+                        SourceRecord(
+                            "Asthma",
+                            "https://medlineplus.gov/asthma.html",
+                            "Synthetic excerpt.",
+                        )
+                    ],
+                )
+            except ValueError:
+                return
+            raise AssertionError("diagnostic output was not rejected")
+        finally:
+            await client.aclose()
+
+    asyncio.run(run_test())
