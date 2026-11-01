@@ -9,6 +9,7 @@ import {
   FileText,
   X
 } from 'lucide-react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 interface ChatMessage {
   id: string;
@@ -336,6 +337,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <SpeedInsights />
     </div>
   );
 }
