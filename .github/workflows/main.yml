@@ -35,8 +35,10 @@ jobs:
         run: flutter config --no-analytics --no-cli-animations
 
       - name: Install Flutter dependencies
-        run: flutter pub get
-
+        run: flutter pub get     
+        working-directory: .
+         
+         
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed lib test
 
